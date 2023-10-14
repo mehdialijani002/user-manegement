@@ -1,4 +1,4 @@
-import React, { useState, lazy, Suspense } from "react";
+import React, { lazy, Suspense, useState } from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -7,19 +7,25 @@ import {
 } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./asset/styles/App.css";
-import PrivateRoute from "./component/private/private.component";
-import ErrorBoundary from "./component/errorBoundary/error.component";
-import PageNotFound from "./pages/pagenotfound/pageNotFound.componet";
-const Home = lazy(() => import("./pages/home/home.component"));
-const User = lazy(() => import("./pages/user/user.component"));
-const Login = lazy(() => import("./pages/login/login.component"));
-const Register = lazy(() => import("./pages/register/register.component"));
+import PrivateRoute from "./component/private";
+import ErrorBoundary from "./component/errorBoundary";
+import PageNotFound from "./pages/pagenotfound/index";
+import { store, persistor } from "./redux/store";
+import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
+import NavbarContainer from "./component/navbar";
+import { ToastContainer } from "react-toastify";
+const Home = lazy(() => import("./pages/home/index"));
+const User = lazy(() => import("./pages/user/index"));
+const Login = lazy(() => import("./pages/login/index"));
+const Register = lazy(() => import("./pages/register/index"));
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   return (
     <Router>
+      <ToastContainer />
       <ErrorBoundary>
         <Routes>
           <Route
@@ -74,21 +80,21 @@ function App() {
           <Route
             path="/user"
             element={
-              <PrivateRoute
-                element={
-                  <Suspense
-                    fallback={
-                      <div className="lazy-loading">در حال بارگزاری...</div>
-                    }
-                  >
-                    <User />
-                  </Suspense>
+              <Suspense
+                fallback={
+                  <div className="lazy-loading">در حال بارگزاری...</div>
                 }
-                isAuthenticated={isAuthenticated}
-              />
+              >
+                <Provider store={store}>
+                  <PersistGate loading={null} persistor={persistor}>
+                    <NavbarContainer />
+                    <User isAuthenticated={isAuthenticated} />
+                  </PersistGate>
+                </Provider>
+              </Suspense>
             }
           />
-          <Route path="/*" element={<PageNotFound />} />
+          <Route path="*" element={<PageNotFound />} />
         </Routes>
       </ErrorBoundary>
     </Router>

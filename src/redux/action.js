@@ -1,12 +1,14 @@
-export const login = (token) => {
-  return {
-    type: "LOGIN",
-    payload: token,
-  };
-};
+export const addUser = (user) => ({
+  type: "ADD_USER",
+  payload: user,
+});
 
-export const logout = () => {
-  return {
-    type: "LOGOUT",
-  };
-};
+export const editUser = (user) => ({
+  type: "EDIT_USER",
+  payload: user,
+});
+
+export const deleteUser = (userId) => ({
+  type: "DELETE_USER",
+  payload: userId,
+});

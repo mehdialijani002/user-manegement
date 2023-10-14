@@ -1,11 +1,13 @@
-import React, { useState } from "react";
-import { Container, Table, Button, Modal, Form } from "react-bootstrap";
-import mockData from "../../api/mock/mock.component";
+import React, { useState, useEffect } from "react";
+import { Container, Table, Button, Modal, Form, Alert } from "react-bootstrap";
+import mockData from "../../api/mock/mock";
 
 function UserManagement() {
-  const [users, setUsers] = useState(mockData);
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [showEditUserModal, setShowEditUserModal] = useState(false);
+  const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+
   const [newUser, setNewUser] = useState({
     name: "",
     lastname: "",
@@ -20,38 +22,82 @@ function UserManagement() {
     password: "",
   });
   const [registeredUser, setRegisteredUser] = useState(null);
+  const [validationErrors, setValidationErrors] = useState({});
 
+  const clearValidationErrors = () => {
+    setValidationErrors({});
+  };
+  const [users, setUsers] = useState(() => {
+    const storedUsers = localStorage.getItem("users");
+    return storedUsers ? JSON.parse(storedUsers) : mockData;
+  });
+  useEffect(() => {
+    localStorage.setItem("users", JSON.stringify(users));
+  }, [users]);
   const addUser = () => {
-    const newUserWithId = { ...newUser, id: users.length + 1 };
-    setUsers([...users, newUserWithId]);
-    setNewUser({ name: "", lastname: "", email: "", password: "" });
-    setShowAddUserModal(false);
+    clearValidationErrors();
+    if (isFormValid(newUser)) {
+      const newUserWithId = { ...newUser, id: users.length + 1 };
+      setUsers([...users, newUserWithId]);
+      setNewUser({ name: "", lastname: "", email: "", password: "" });
+      setShowAddUserModal(false);
+    }
   };
 
   const editUser = (id) => {
+    clearValidationErrors();
     const userToEdit = users.find((user) => user.id === id);
     setEditedUser(userToEdit);
     setShowEditUserModal(true);
   };
 
   const saveEditedUser = () => {
-    const updatedUsers = users.map((user) =>
-      user.id === editedUser.id ? editedUser : user
-    );
-    setUsers(updatedUsers);
-    setEditedUser({
-      id: null,
-      name: "",
-      lastname: "",
-      email: "",
-      password: "",
-    });
-    setShowEditUserModal(false);
+    clearValidationErrors();
+    if (isFormValid(editedUser)) {
+      const updatedUsers = users.map((user) =>
+        user.id === editedUser.id ? editedUser : user
+      );
+      setUsers(updatedUsers);
+      setEditedUser({
+        id: null,
+        name: "",
+        lastname: "",
+        email: "",
+        password: "",
+      });
+      setShowEditUserModal(false);
+    }
   };
-
   const deleteUser = (id) => {
-    const updatedUsers = users.filter((user) => user.id !== id);
-    setUsers(updatedUsers);
+    const userToDelete = users.find((user) => user.id === id);
+    setUserToDelete(userToDelete);
+    setShowDeleteUserModal(true);
+  };
+  const confirmDeleteUser = () => {
+    if (userToDelete) {
+      const updatedUsers = users.filter((user) => user.id !== userToDelete.id);
+      setUsers(updatedUsers);
+      setShowDeleteUserModal(false);
+    }
+  };
+  const isFormValid = (user) => {
+    const errors = {};
+
+    if (!user.name.trim()) {
+      errors.name = "نام نمی‌تواند خالی باشد.";
+    }
+    if (!user.lastname.trim()) {
+      errors.lastname = "نام خانوادگی نمی‌تواند خالی باشد.";
+    }
+    if (!user.email.trim()) {
+      errors.email = "ایمیل نمی‌تواند خالی باشد.";
+    }
+    if (!user.password.trim()) {
+      errors.password = "رمز عبور نمی‌تواند خالی باشد.";
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   return (
@@ -231,6 +277,33 @@ function UserManagement() {
           </Button>
         </Modal.Footer>
       </Modal>
+      {userToDelete && (
+        <Modal
+          show={showDeleteUserModal}
+          onHide={() => setShowDeleteUserModal(false)}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>تأیید حذف کاربر</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p>
+              آیا شما مطمئن هستید که می‌خواهید کاربر "{userToDelete.name}" را
+              حذف کنید؟
+            </p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setShowDeleteUserModal(false)}
+            >
+              انصراف
+            </Button>
+            <Button variant="danger" onClick={confirmDeleteUser}>
+              حذف
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      )}
       <Button
         onClick={() => setShowAddUserModal(true)}
         className="d-flex justify-content-center mx-auto  py-2 px-4"

@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import * as Yup from "yup";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import ReCAPTCHA from "react-google-recaptcha";
-import mockData from "../../api/mock/mock.component";
+import mockData from "../../api/mock/mock";
 import { Link, useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Login = ({ onLogin }) => {
@@ -46,7 +46,7 @@ const Login = ({ onLogin }) => {
   return (
     <div className="login-container">
       <h1>ورود</h1>
-      <ToastContainer />
+
       <Formik
         initialValues={{
           text: "",
@@ -91,11 +91,7 @@ const Login = ({ onLogin }) => {
                 <ErrorMessage name="password" />
               </div>
             </div>
-            <div className="mb-3">
-              <Link to={"/register"} className="login-link">
-                ثبت نام
-              </Link>
-            </div>
+
             <div className="mb-3">
               <ReCAPTCHA
                 sitekey="6LfzJ4QoAAAAAJMLDdY4f1b-JzvRlr9dfhnRpL8N"

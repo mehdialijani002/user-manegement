@@ -5,7 +5,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import mockData from "../../api/mock/mock.component";
+import mockData from "../../api/mock/mock";
 
 const Register = () => {
   const [recaptchaValue, setRecaptchaValue] = useState("");
@@ -23,7 +23,6 @@ const Register = () => {
 
   const handleSubmit = (values, { setSubmitting }) => {
     if (!recaptchaValue) {
-      // reCAPTCHA not verified
       setSubmitting(false);
       toast.error("  را کامل کنید reCAPTCHA.");
       return;
@@ -37,10 +36,7 @@ const Register = () => {
       password: values.password,
     };
 
-    // Create a copy of your existing users array and add the new user to it
     const updatedUsers = [...users, newUser];
-
-    // Update the state with the updated users array
     setUsers(updatedUsers);
     setSubmitting(false);
 
